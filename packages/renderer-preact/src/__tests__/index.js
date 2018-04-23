@@ -77,3 +77,62 @@ test('wrappers cleanup', () => {
   expect(el._renderRoot).toBeNull();
   expect(willUnmountSpy).toHaveBeenCalled();
 });
+
+test('rendering after re-connecting works', () => {
+  const root = document.createElement('div');
+
+  const didMountSpy = jest.fn();
+  const willUnmountSpy = jest.fn();
+  class PreactComponent extends Component {
+    componentDidMount = didMountSpy;
+    componentWillUnmount = willUnmountSpy;
+    render() {
+      return <div />;
+    }
+  }
+
+  @define
+  class PreactComponentWrapper extends withRenderer() {
+    render() {
+      return <PreactComponent {...this.props} />;
+    }
+  }
+
+  expect(didMountSpy).toHaveBeenCalledTimes(0);
+  expect(willUnmountSpy).toHaveBeenCalledTimes(0);
+
+  const el = new PreactComponentWrapper();
+  root.appendChild(el);
+
+  expect(didMountSpy).toHaveBeenCalledTimes(0);
+  expect(willUnmountSpy).toHaveBeenCalledTimes(0);
+
+  el.renderer(el, el.render.bind(el));
+
+  expect(el.innerHTML).toMatchSnapshot();
+  expect(didMountSpy).toHaveBeenCalledTimes(1);
+  expect(willUnmountSpy).toHaveBeenCalledTimes(0);
+
+  root.removeChild(el);
+
+  expect(el.innerHTML).toMatchSnapshot();
+  expect(el._renderRoot).toBeNull();
+  expect(didMountSpy).toHaveBeenCalledTimes(1);
+  expect(willUnmountSpy).toHaveBeenCalledTimes(1);
+
+  // Re-connect
+  root.appendChild(el);
+
+  el.renderer(el, el.render.bind(el));
+
+  expect(el.innerHTML).toMatchSnapshot();
+  expect(didMountSpy).toHaveBeenCalledTimes(2);
+  expect(willUnmountSpy).toHaveBeenCalledTimes(1);
+
+  root.removeChild(el);
+
+  expect(el.innerHTML).toMatchSnapshot();
+  expect(el._renderRoot).toBeNull();
+  expect(didMountSpy).toHaveBeenCalledTimes(2);
+  expect(willUnmountSpy).toHaveBeenCalledTimes(2);
+});

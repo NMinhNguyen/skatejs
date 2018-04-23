@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`rendering after re-connecting works 1`] = `"<div></div>"`;
+
+exports[`rendering after re-connecting works 2`] = `""`;
+
+exports[`rendering after re-connecting works 3`] = `"<div></div>"`;
+
+exports[`rendering after re-connecting works 4`] = `""`;
+
 exports[`renders 1`] = `""`;
 
 exports[`renders 2`] = `"<div>Hello, World!</div>"`;
